@@ -1,0 +1,15 @@
+#colcon artifacts
+**/build/
+**/install/
+**/log/
+
+#python
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
+.venv/
+
+#editor/OS files
+.vscode-server/
+.vscode-server-insiders/
+.DB_Store
