@@ -4,7 +4,7 @@ pi_ws - pi workspace (Onboard rasperry pi)
 
 ## Conenction instructions
 
-### make sure pi and pc can talk to each other.
+### 1. make sure pi and pc can talk to each other.
 On pc:
 ```
 ping 192.168.2.2
@@ -14,5 +14,10 @@ On pi:
 ping 192.168.2.1
 ```
 
-### Match ROS2 "domain" and allow network discovery.
-On both sides set ``` ROS_DOMAIN_ID ``` to the same number (anything between 0 and 232)
+### 2. Match ROS2 "domain" and allow network discovery.
+On both sides set ``` ROS_DOMAIN_ID ``` to the same number (anything between 0 and 232):
+```
+export ROS_DOMAIN_ID=0
+export ROS_LOCALHOST_ONLY=1
+```
+
