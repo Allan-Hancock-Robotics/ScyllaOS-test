@@ -9,7 +9,8 @@
 **/*.egg-info/
 .venv/
 
-#editor/OS files
+#misc
 .vscode-server/
 .vscode-server-insiders/
 .DB_Store
+.devcontainer
