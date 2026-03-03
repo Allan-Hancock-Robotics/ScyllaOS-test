@@ -25,9 +25,18 @@ export ROS_DOMAIN_ID=0
 export ROS_LOCALHOST_ONLY=1
 ```
 
-If we run ```echo $ROS_DOMAIN_ID``` and ```echo $ROS_DOMAIN_ID``` we should see 0 and 1 to check if they were set correctly.
+If we run ```echo $ROS_DOMAIN_ID``` and ```echo $ROS_LOCALHOST_ONLY``` we should see 0 and 1 to check if they were set correctly.
 
 ### 3. Open firewal for ROS2 DDS traffic
 Because ROS2 uses UDP ports and multicast, we want to make sure the pc's firewall doesn't stop us. 
 
 **Windows:** Allow inbound/outbound UDP for our ROS2 executables to talk. You can also disable the firewall temporarily if needed.
+
+    1. Open Windows Firewall -> Advanced settings
+    2. Inbound Rules -> New Rules -> 
+    3. Protocal: UDP
+    4. Specific local ports: 7400-7500 (should be enough for our setup, if not, widen to 7400-7600)
+    5. Allow connection
+    6. Apply to domain/private/public as needed
+    7. Give it a name
+Outbound Rules are usually allowed by default so you shouldn't need to set a rule for it. If you're having problems connecting, try setting the same rule for Outbound Rules.
