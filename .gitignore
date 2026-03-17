@@ -3,6 +3,10 @@
 **/install/
 **/log/
 
+#ROS2 RWM 
+eclipse-cyclonedds/
+ros2/
+
 #python
 **/__pycache__/
 **/*.py[cod]

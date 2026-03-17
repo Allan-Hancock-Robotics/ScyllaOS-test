@@ -1,10 +1,22 @@
 # ScyllaOS
 pc_ws - pc workspace (Ground control pc)
 pi_ws - pi workspace (Onboard rasperry pi)
+The following setup instructions are done with a Windows pc.
+
+## Setup ethernet connection to the robot's Raspberry Pi 4
+To have your pc talk to the robot you need to change your ethernet settings, as the robot uses a tethered ethernet connection.
+1. Open control panel -> Network/sharing
+2. Open settings for your ethernet port. Either go to "change adapter settings" and click "Ethernet" or click on "Ethernet" in the active networks view
+3. Go to properties -> Internet Protocal Version 4 (TCP/IPv4)
+4. Change from "Obtain an IP address automatically" to "Use the following IP address" and enter the following:
+```
+IP address: 192.168.2.1
+Subjet mask: 255.255.255.0
+```
+This sets the IP for your ethernet port manually and this is the IP address that the robot will look for when connecting
+5. Press OK and exit
 
 ## Code Layout
-On the Pi we have BlueOS as the Operating System. Within BlueOS there is the ROS2 extension. This is where we are making connections to the pc and the controller.
-
 
 ## Connection instructions
 
@@ -19,10 +31,10 @@ ping 192.168.2.1
 ```
 
 ### 2. Match ROS2 "domain" and allow network discovery.
-On both sides set ```ROS_DOMAIN_ID``` to the same number (anything between 0 and 232):
+On both sides set ```ROS_DOMAIN_ID``` to the same number (anything between 0 and 232) and set ```ROS_LOCALHOST_ONLY``` to false so ros2 can communicate with a separate device:
 ```
-export ROS_DOMAIN_ID=0
-export ROS_LOCALHOST_ONLY=1
+export ROS_DOMAIN_ID=1
+export ROS_LOCALHOST_ONLY=0
 ```
 
 If we run ```echo $ROS_DOMAIN_ID``` and ```echo $ROS_LOCALHOST_ONLY``` we should see 0 and 1 to check if they were set correctly.
