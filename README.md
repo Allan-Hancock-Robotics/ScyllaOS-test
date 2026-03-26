@@ -54,23 +54,34 @@ Outbound Rules are usually allowed by default so you shouldn't need to set a rul
 
 ### helpful commands to check environment variables
 On pi side (and also on linux pc):
+
 **Check domain id:** ```echo $ROS_DOMAIN_ID```
+
 **check if local host only is on/off:** ```echo $ROS_LOCALHOST_ONLY```
+
 **check middleware implementation:** ```echo $RMW_IMPLEMENTATION```
 
 On pc side (windows):
 **Check domain id:** ```$env:$ROS_DOMAIN_ID```
+
 **check if local host only is on/off:** ```$env:$ROS_LOCALHOST_ONLY```
+
 **check middleware implementation:** ```$env:$RMW_IMPLEMENTATION```
 
 if these variables show nothing they they are set to default:
+
 **Domain ID:** ROS2 uses domain 0 by default. If both sides are on domain 0, they can connect just fine 
+
 **Local Host Only:** Set to off by default. We usually want it set to off, otherwise ROS 2 won't communicate on other devices
+
 **Middleware Implementation:** Ros2 uses the default middleware installed on the system (usually Fast DDS, Connext DDS, or Eclipse Cyclone DDS)
 
 
 ### other helpful commands:
 List sypes of all active services:```ros2 service list -t```
+
 Get info on a service:```ros2 service info <service_name>```
+
 Save a node's parameter configuration to a file:```ros2 param dump <node_name> > <filename>```
+
 Load a node's parameter from a file:```ros2 param load <node_name> <filename>```
