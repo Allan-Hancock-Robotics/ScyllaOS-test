@@ -13,6 +13,7 @@ We need to configure an ethernet port for the computer we are using to make sure
         * Address: 192.168.2.1
         * Netmask 255.255.255.0
         * Gateway: Leave empty
+        
         And press Add
 * **Windows:**
     To have your pc talk to the robot you need to change your ethernet settings, as the robot uses a tethered ethernet connection.
@@ -46,24 +47,29 @@ ping 192.168.2.1
 Because ROS2 uses UDP ports and multicast, we want to make sure the pc's firewall doesn't stop us. 
 
 **Windows:** Allow inbound/outbound UDP for our ROS2 executables to talk. You can also disable the firewall temporarily if needed.
-    1. Open Windows Firewall -> Advanced settings
-    2. Inbound Rules -> New Rules -> 
-    3. Protocal: UDP
-    4. Specific local ports: 7400-7500 (should be enough for our setup, if not, widen to 7400-7600)
-    5. Allow connection
-    6. Apply to domain/private/public as needed
-    7. Give it a name
+1. Open Windows Firewall -> Advanced settings
+2. Inbound Rules -> New Rules -> 
+3. Protocal: UDP
+4. Specific local ports: 7400-7500 (should be enough for our setup, if not, widen to 7400-7600)
+5. Allow connection
+6. Apply to domain/private/public as needed
+7. Give it a name
 Outbound Rules are usually allowed by default so you shouldn't need to set a rule for it. If you're having problems connecting, try setting the same rule for Outbound Rules.
 
 ### 3. Install ROS2 Jazzy on your pc
 Follow these steps to install ros2 jazzy: 
-* **Windows:**https://docs.ros.org/en/jazzy/Installation/Windows-Install-Binary.html
+* **Windows:** https://docs.ros.org/en/jazzy/Installation/Windows-Install-Binary.html
 * **Linux:** https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html
 
-### 4. Clone this repo and add teleop_node workspace
-If you followed the installation instructions correctly (and are using Windows) you should have a pixi_ws workspace folder (or you might've named it something else, here' I'll refer to the workspace as pixi_ws). Here you can clone this repo to have all our Scylla code available.
+### 4. Clone this repo 
+* Linux: In the root directory or in a workspace directory you can directly clone this repo. ROS2 Jazzzy should come with teleop_node and joy for controller usage by default.
+* Windows: If you followed the installation instructions correctly (and are using Windows) you should have a pixi_ws workspace folder (or you might've named it something else, here' I'll refer to the workspace as pixi_ws). Here you can clone this repo to have all our Scylla code available.
+
+
+### 5. (Windows) add teleop_node workspace 
 
 In addition, you will want to add another workspace to install ros2 packages for reading and using controller inputs:
+
 1. Make another directory in pixi_ws called teleop_ws (or something memorable), and a src directory inside that, teleop_ws\src. 
 2. Use ```pixi shell``` to enter the pixi environment so the colcon command is available
 3. Source the ROS2 Jazzy environment: ```call C:\pixi_ws\ros2-windows\local_setup.bat``` 
