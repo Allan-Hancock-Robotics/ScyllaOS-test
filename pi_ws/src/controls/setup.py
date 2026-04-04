@@ -23,7 +23,7 @@ setup(
         ],
     },
     entry_points={
-        'console_scripts': [
+        'console_scripts': [ "joy-input = 'controls.joy-input:main' "
         ],
     },
 )
