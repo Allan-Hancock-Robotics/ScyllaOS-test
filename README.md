@@ -131,6 +131,18 @@ Save a node's parameter configuration to a file:```ros2 param dump <node_name> >
 
 Load a node's parameter from a file:```ros2 param load <node_name> <filename>```
 
+**command to run mavros with mavlink endpoint** ```ros2 run mavros mavros_node --ros-args -p fcu_url:=udp://:14000@```
+**command to check mavlink endpoint port (outside of ros2 environoment)*** ```ros2 run mavros mavros_node --ros-args -p fcu_url:=udp://:14000@```
+***sanity check commands to verify telemetry streaming**
+- ```ros2 topic hz /mavros/imu/data```
+- ```ros2 topic hz /mavros/battery```
+- ```ros2 topic echo /mavros/statustext/recv```
+**send simple movement command**
+``` ros2 topic pub -r 10 /mavros/manual_control/send mavros_msgs/msg/ManualControl \ "{x: 200, y: 0, z: 500, r: 0, buttons: 0}" ```
 
-## Code Layout
-Still in progress
+## architecture Layout
+- mavlink-routerd is LISTENING on UDP 0.0.0.0:14660 (a UDP server endpoint)
+- It is also sending MAVLink OUT to 127.0.0.1:14000 (a UDP outgoing endpoint)
+- And it’s sending out to 192.168.2.1:14550 (that’s likely for QGC/clients on that network)
+
+- mavros listens on 127.0.0.1:14000 
