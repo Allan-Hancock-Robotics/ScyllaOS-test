@@ -131,9 +131,12 @@ Save a node's parameter configuration to a file:```ros2 param dump <node_name> >
 
 Load a node's parameter from a file:```ros2 param load <node_name> <filename>```
 
-**command to run mavros with mavlink endpoint** ```ros2 run mavros mavros_node --ros-args -p fcu_url:=udp://:14000@```
+**open ROS monitoring window (pc side)** ```rqt```
 
-**command to check mavlink endpoint port (outside of ros2 environoment)*** ```ros2 run mavros mavros_node --ros-args -p fcu_url:=udp://:14000@```
+**command to run mavros with mavlink endpoint** ```ros2 run mavros mavros_node --ros-args -p fcu_url:=udp://:14000@127.0.0.1:14660/?ids=255,190```
+**run mavros with yaml file params**```ros2 run mavros mavros_node --ros-args --params-file /tmp/mavros_ardusub.yaml```
+
+**set mavros to armed*** ```ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}"```
 
 **sanity check commands to verify telemetry streaming**
 - ```ros2 topic hz /mavros/imu/data```
@@ -142,6 +145,17 @@ Load a node's parameter from a file:```ros2 param load <node_name> <filename>```
 
 **send simple movement command**
 ``` ros2 topic pub -r 10 /mavros/manual_control/send mavros_msgs/msg/ManualControl \ "{x: 200, y: 0, z: 500, r: 0, buttons: 0}" ```
+
+**send simple movement with RC overide*** ```ros2 topic pub -r 10 /mavros/rc/override mavros_msgs/msg/OverrideRCIn \ "{channels: [1500, 1500, 1700, 1500, 1500, 1500, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535]}"```
+
+**test mavros can send MAVLink requests and get response** ```ros2 service call /mavros/param/pull mavros_msgs/srv/ParamPull "{}"```
+
+**check mavros emitting mavlink signals (while sending commands)*** ```ros2 topic echo uas1/mavlink_sink```
+
+**list mavlink/ardupilot processes** ```ps aux | egrep 'mavlink|ardupilot|mavproxy|router' | grep -v egrep```
+
+# IMPORTANT: REMEMBER TO RE-ENABLE FS_GCS_ENABLE 
+# REMEMBER TO RE0CONFIGURE RC_OVERRIDE_TIME
 
 ## architecture Layout
 - mavlink-routerd is LISTENING on UDP 0.0.0.0:14660 (a UDP server endpoint)

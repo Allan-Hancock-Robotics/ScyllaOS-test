@@ -1,0 +1,11 @@
+mavros_node:
+  ros__parameters:
+    fcu_url: "udp://:14000@127.0.0.1:14660"
+    gcs_url: ""
+
+mavros:
+  ros__parameters:
+    system_id: 255
+    component_id: 190
+    target_system_id: 1
+    target_component_id: 1
