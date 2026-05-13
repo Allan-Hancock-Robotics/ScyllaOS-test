@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [ 
             'joy_input = controls.joy_input:main'
+            'cmd_vel_to_manual_control = controls.cmd_vel_to_manual_control:main'
         ],
     },
 )
