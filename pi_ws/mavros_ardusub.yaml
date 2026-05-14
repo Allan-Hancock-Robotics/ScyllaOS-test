@@ -9,38 +9,3 @@ mavros:
     component_id: 190
     target_system_id: 1
     target_component_id: 1
-
-joy_to_manual_control:
-  ros__parameters:
-    # Gripper buttons
-    gripper_id: 1
-    gripper_open_button: 0
-    gripper_close_button: 1
-    gripper_hold_button: -1
-
-    # Joystick axes
-    axis_forward: 1
-    axis_lateral: 0
-    axis_yaw: 3
-
-    # This is ignored when both axis_vertical_up/down are >= 0
-    axis_vertical: 4
-
-    scale_forward: 1000.0
-    scale_lateral: 1000.0
-    scale_vertical: 500.0
-    scale_yaw: 1000.0
-
-    # Trigger-pair vertical control
-    # From your /joy screenshots: triggers rest at 0.0 and press to -1.0
-    axis_vertical_up: 5
-    axis_vertical_down: 4
-    trigger_rest: 0.0
-    trigger_pressed: -1.0
-
-    deadzone: 0.08
-    publish_rate_hz: 20.0
-    cmd_timeout_sec: 0.5
-    enable_button: -1
-    publish_buttons: true
-    log_neutral_timeout: true

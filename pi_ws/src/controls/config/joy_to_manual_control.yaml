@@ -5,7 +5,7 @@
     # -------------------------
     axis_forward: 1
     axis_lateral: 0
-    axis_yaw: 3
+    axis_yaw: 2
 
     # Single vertical fallback; ignored when trigger pair is enabled.
     axis_vertical: 4
