@@ -1,0 +1,65 @@
+/**:
+  ros__parameters:
+    # -------------------------
+    # Movement axes
+    # -------------------------
+    axis_forward: 1
+    axis_lateral: 0
+    axis_yaw: 3
+
+    # Single vertical fallback; ignored when trigger pair is enabled.
+    axis_vertical: 4
+
+    # Trigger-pair vertical control
+    # Your controller:
+    #   LT = axis 4
+    #   RT = axis 5
+    #   rest = 0.0
+    #   pressed = -1.0
+    #
+    # Current mapping:
+    #   RT -> up
+    #   LT -> down
+    axis_vertical_up: 5
+    axis_vertical_down: 4
+    trigger_rest: 0.0
+    trigger_pressed: -1.0
+
+    # -------------------------
+    # Movement scaling
+    # -------------------------
+    scale_forward: 1000.0
+    scale_lateral: 1000.0
+    scale_vertical: 500.0
+    scale_yaw: 1000.0
+
+    deadzone: 0.08
+    publish_rate_hz: 20.0
+    cmd_timeout_sec: 0.5
+    enable_button: -1
+
+    publish_buttons: true
+    log_neutral_timeout: true
+
+    # -------------------------
+    # Gripper / claw buttons
+    # -------------------------
+    # A = open/release
+    # B = close/grab
+    gripper_open_button: 0
+    gripper_close_button: 1
+    gripper_hold_button: -1
+
+    # Use direct servo pulse mode for your claw.
+    # This requires the node code to use MAV_CMD_DO_SET_SERVO.
+    gripper_use_direct_servo: true
+    gripper_servo_number: 9
+
+    # Conservative claw values.
+    # Use 1100/1900 only if 1300/1700 is too weak.
+    gripper_open_pwm: 1300.0
+    gripper_close_pwm: 1700.0
+    gripper_neutral_pwm: 1500.0
+
+    # How long to drive open/close before returning to neutral.
+    gripper_pulse_sec: 0.5

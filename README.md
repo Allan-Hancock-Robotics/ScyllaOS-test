@@ -134,7 +134,7 @@ Load a node's parameter from a file:```ros2 param load <node_name> <filename>```
 **open ROS monitoring window (pc side)** ```rqt```
 
 **command to run mavros with mavlink endpoint** ```ros2 run mavros mavros_node --ros-args -p fcu_url:=udp://:14000@127.0.0.1:14660/?ids=255,190```
-**run mavros with yaml file params**```ros2 run mavros mavros_node --ros-args --params-file /tmp/mavros_ardusub.yaml```
+**run mavros with yaml file params**```ros2 run mavros mavros_node --ros-args --params-file mavros_ardusub.yaml```
 
 **set mavros to armed*** ```ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}"```
 
@@ -148,14 +148,42 @@ Load a node's parameter from a file:```ros2 param load <node_name> <filename>```
 
 **send simple movement with RC overide*** ```ros2 topic pub -r 10 /mavros/rc/override mavros_msgs/msg/OverrideRCIn \ "{channels: [1500, 1500, 1700, 1500, 1500, 1500, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535]}"```
 
-**test mavros can send MAVLink requests and get response** ```ros2 service call /mavros/param/pull mavros_msgs/srv/ParamPull "{}"```
+**test mavros can send MAVLink requests and get response**
+ ```ros2 service call /mavros/param/pull mavros_msgs/srv/ParamPull "{}"```
 
-**check mavros emitting mavlink signals (while sending commands)*** ```ros2 topic echo uas1/mavlink_sink```
+**check mavros emitting mavlink signals (while sending commands)*** 
+```ros2 topic echo uas1/mavlink_sink```
 
-**list mavlink/ardupilot processes** ```ps aux | egrep 'mavlink|ardupilot|mavproxy|router' | grep -v egrep```
+**list mavlink/ardupilot processes** 
+```ps aux | egrep 'mavlink|ardupilot|mavproxy|router' | grep -v egrep```
 
-# IMPORTANT: REMEMBER TO RE-ENABLE FS_GCS_ENABLE 
-# REMEMBER TO RE0CONFIGURE RC_OVERRIDE_TIME
+**offline install camera packages*** 
+``` /root/persistent_ws/install_camera_tools_offline.sh```
+
+### temporary camera configuration
+***Install camera packages in pi container** 
+```
+apt update
+apt install -y \
+  ros-jazzy-v4l2-camera \
+  ros-jazzy-image-transport-plugins \
+  v4l-utils
+```
+**check camera formats** ``` v4l2-ctl --device=/dev/video0 --list-formats-ext ```
+***pi camera publisher**
+```
+ros2 run v4l2_camera v4l2_camera_node --ros-args \
+  -r image_raw:=/camera/image_raw \
+  -p video_device:=/dev/video0 \
+  -p pixel_format:=YUYV \
+  -p output_encoding:=rgb8 \
+  -p image_size:="[1920,1080]" \
+  -p qos_overrides./image_raw.publisher.reliability:=best_effort
+```
+
+
+### IMPORTANT: REMEMBER TO RE-ENABLE FS_GCS_ENABLE 
+### REMEMBER TO RE0CONFIGURE RC_OVERRIDE_TIME
 
 ## architecture Layout
 - mavlink-routerd is LISTENING on UDP 0.0.0.0:14660 (a UDP server endpoint)
@@ -163,3 +191,30 @@ Load a node's parameter from a file:```ros2 param load <node_name> <filename>```
 - And it’s sending out to 192.168.2.1:14550 (that’s likely for QGC/clients on that network)
 
 - mavros listens on 127.0.0.1:14000 
+
+- Message Structure (mavros_msgs/msg/ManualControl.msg):
+```
+# Manual Control state
+std_msgs/Header header
+        builtin_interfaces/Time stamp
+                int32 sec
+                uint32 nanosec
+        string frame_id
+float32 x
+float32 y
+float32 z
+float32 r
+uint16 buttons
+
+# -*- only available with MAVLink v2.0 -*-
+uint16 buttons2
+uint8 enabled_extensions
+float32 s
+float32 t
+float32 aux1
+float32 aux2
+float32 aux3
+float32 aux4
+float32 aux5
+float32 aux6
+```
