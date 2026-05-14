@@ -26,6 +26,7 @@ setup(
         'console_scripts': [ 
             'joy_input = controls.joy_input:main'
             'cmd_vel_to_manual_control = controls.cmd_vel_to_manual_control:main'
+            'joy_to_manual_control = controls.joy_to_manual_control_node:main'
         ],
     },
 )
