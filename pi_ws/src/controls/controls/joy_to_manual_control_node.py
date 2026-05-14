@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Sequence
+from mavros_msgs.srv import CommandLong
 
 import rclpy
 from rclpy.node import Node
@@ -70,6 +71,15 @@ class JoyToManualControl(Node):
         self.declare_parameter("publish_buttons", True)
         self.declare_parameter("log_neutral_timeout", True)
 
+        # Gripper button parameters
+        self.declare_parameter("gripper_open_button", 0)   # example: A
+        self.declare_parameter("gripper_close_button", 1)  # example: B
+        self.declare_parameter("gripper_hold_button", -1)  # disabled by default
+        self.declare_parameter("gripper_id", 1)
+
+        self.command_client = self.create_client(CommandLong, "/mavros/cmd/command")
+        self.previous_buttons = []
+
         joy_topic = str(self.get_parameter("joy_topic").value)
         manual_control_topic = str(self.get_parameter("manual_control_topic").value)
         publish_rate_hz = float(self.get_parameter("publish_rate_hz").value)
@@ -96,6 +106,26 @@ class JoyToManualControl(Node):
     def _on_joy(self, msg: Joy) -> None:
         self._last_joy = msg
         self._last_joy_time = self.get_clock().now()
+
+        buttons = list(msg.buttons)
+
+        open_button = int(self.get_parameter("gripper_open_button").value)
+        close_button = int(self.get_parameter("gripper_close_button").value)
+        hold_button = int(self.get_parameter("gripper_hold_button").value)
+
+        if self._button_rising_edge(buttons, open_button):
+            self.get_logger().info("Gripper open/release")
+            self._send_gripper_action(0)
+
+        if self._button_rising_edge(buttons, close_button):
+            self.get_logger().info("Gripper close/grab")
+            self._send_gripper_action(1)
+
+        if self._button_rising_edge(buttons, hold_button):
+            self.get_logger().info("Gripper hold")
+            self._send_gripper_action(2)
+
+        self.previous_buttons = buttons
 
     def _axis_value(self, axes: Sequence[float], index: int) -> float:
         if index < 0 or index >= len(axes):
@@ -124,6 +154,59 @@ class JoyToManualControl(Node):
 
     def _button_pressed(self, buttons: Sequence[int], index: int) -> bool:
         return 0 <= index < len(buttons) and bool(buttons[index])
+    
+    def _button_rising_edge(self, buttons, index: int) -> bool:
+        if index < 0:
+            return False
+        if index >= len(buttons):
+            return False
+
+        previous = 0
+        if index < len(self.previous_buttons):
+            previous = self.previous_buttons[index]
+
+        return buttons[index] == 1 and previous == 0
+
+
+    def _send_gripper_action(self, action: int):
+        """
+        action:
+        0 = release/open
+        1 = grab/close
+        2 = hold
+        """
+        if not self.command_client.service_is_ready():
+            self.get_logger().warn("/mavros/cmd/command is not available; gripper command skipped")
+            return
+
+        gripper_id = int(self.get_parameter("gripper_id").value)
+
+        req = CommandLong.Request()
+        req.broadcast = False
+        req.command = 211  # MAV_CMD_DO_GRIPPER
+        req.confirmation = 0
+        req.param1 = float(gripper_id)
+        req.param2 = float(action)
+        req.param3 = 0.0
+        req.param4 = 0.0
+        req.param5 = 0.0
+        req.param6 = 0.0
+        req.param7 = 0.0
+
+        future = self.command_client.call_async(req)
+        future.add_done_callback(self._on_gripper_response)
+
+
+    def _on_gripper_response(self, future):
+        try:
+            result = future.result()
+            if result is None:
+                self.get_logger().warn("Gripper command returned no result")
+            elif not result.success:
+                self.get_logger().warn(f"Gripper command failed: result={result.result}")
+        except Exception as exc:
+            self.get_logger().warn(f"Gripper command exception: {exc}")
+
 
     def _buttons_bitmask(self, buttons: Sequence[int]) -> int:
         if not bool(self.get_parameter("publish_buttons").value):

@@ -9,3 +9,12 @@ mavros:
     component_id: 190
     target_system_id: 1
     target_component_id: 1
+
+joy_to_manual_control:
+  ros__parameters:
+    gripper_id: 1
+
+    # Change these after checking `ros2 topic echo /joy`
+    gripper_open_button: 0
+    gripper_close_button: 1
+    gripper_hold_button: -1
