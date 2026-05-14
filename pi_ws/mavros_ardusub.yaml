@@ -33,8 +33,8 @@ joy_to_manual_control:
 
     # Trigger-pair vertical control
     # From your /joy screenshots: triggers rest at 0.0 and press to -1.0
-    axis_vertical_up: 4
-    axis_vertical_down: 5
+    axis_vertical_up: 5
+    axis_vertical_down: 4
     trigger_rest: 0.0
     trigger_pressed: -1.0
 
