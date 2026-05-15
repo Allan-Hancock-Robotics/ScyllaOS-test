@@ -119,7 +119,7 @@ for i in $(seq 1 60); do
         exit 1
     fi
 
-    echo "  waiting for MAVROS... ${i}/60"
+    echo "  waiting for MAVROS... ${i}/120"
     sleep 0.5
 done
 
