@@ -136,6 +136,9 @@ Load a node's parameter from a file:```ros2 param load <node_name> <filename>```
 **command to run mavros with mavlink endpoint** ```ros2 run mavros mavros_node --ros-args -p fcu_url:=udp://:14000@127.0.0.1:14660/?ids=255,190```
 **run mavros with yaml file params**```ros2 run mavros mavros_node --ros-args --params-file mavros_ardusub.yaml```
 
+**run joy_to_manual with yaml file params***
+``` ros2 run controls joy_to_manual_control --ros-args   --params-file src/controls/config/joy_to_manual_control.yaml```
+
 **set mavros to armed*** ```ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}"```
 
 **sanity check commands to verify telemetry streaming**
