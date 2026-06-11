@@ -100,37 +100,7 @@ On pi side (and also on linux pc):
 
 **check middleware implementation:** ```echo $RMW_IMPLEMENTATION```
 
-On pc side (windows):
-**Check domain id:** ```$env:$ROS_DOMAIN_ID```
-
-**check if local host only is on/off:** ```$env:$ROS_LOCALHOST_ONLY```
-
-**check middleware implementation:** ```$env:$RMW_IMPLEMENTATION```
-
-if these variables show nothing they they are set to default:
-
-**Domain ID:** ROS2 uses domain 0 by default. If both sides are on domain 0, they can connect just fine 
-
-**Local Host Only:** Set to off by default. We usually want it set to off, otherwise ROS 2 won't communicate on other devices
-
-**Middleware Implementation:** Ros2 uses the default middleware installed on the system (usually Fast DDS, Connext DDS, or Eclipse Cyclone DDS)
-
-
-### important scripts for windows
-1. ```call C:\pixi_ws\ros2-windows\local_setup.bat```
-2. ```call C:\pixi_ws\teleop_ws\install\local_setup.bat```
-
 ### other helpful commands:
-Call a service:```ros2 service call <service_name> <service_type> <arguments>```
-
-List types of all active services:```ros2 service list -t```
-
-Get info on a service:```ros2 service info <service_name>```
-
-Save a node's parameter configuration to a file:```ros2 param dump <node_name> > <filename>```
-
-Load a node's parameter from a file:```ros2 param load <node_name> <filename>```
-
 **open ROS monitoring window (pc side)** ```rqt```
 
 **command to run mavros with mavlink endpoint** ```ros2 run mavros mavros_node --ros-args -p fcu_url:=udp://:14000@127.0.0.1:14660/?ids=255,190```
@@ -164,7 +134,9 @@ Load a node's parameter from a file:```ros2 param load <node_name> <filename>```
 ``` /root/persistent_ws/install_camera_tools_offline.sh```
 
 ### temporary camera configuration
-***Install camera packages in pi container** 
+**offline install camera packages**
+```
+***Install camera packages in pi container (NEEDS WIFI)** 
 ```
 apt update
 apt install -y \
