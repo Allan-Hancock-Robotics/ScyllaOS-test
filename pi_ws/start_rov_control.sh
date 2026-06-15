@@ -79,32 +79,32 @@ echo "MAVROS log: ${LOG_DIR}/mavros.log"
 echo "Waiting for MAVROS connection..."
 MAVROS_CONNECTED=0
 
-for i in $(seq 1 60); do
-    STATE="$(timeout 2s ros2 topic echo /mavros/state --once 2>/dev/null || true)"
+for i in $(seq 1 90); do
+    if ! kill -0 "${MAVROS_PID}" >/dev/null 2>&1; then
+        echo "ERROR: MAVROS exited early."
+        echo "Last MAVROS log lines:"
+        tail -n 80 "${LOG_DIR}/mavros.log" || true
+        exit 1
+    fi
 
-    if echo "${STATE}" | grep -q "connected: true"; then
+    CONNECTED_FIELD="$(timeout 5s ros2 topic echo /mavros/state --once --field connected 2>/dev/null || true)"
+    
+    if echo "${CONNECTED_FIELD}" | grep -qi "true"; then
         echo "MAVROS connected."
         MAVROS_CONNECTED=1
         break
     fi
 
-    if ! kill -0 "${MAVROS_PID}" >/dev/null 2>&1; then
-        echo "ERROR: MAVROS exited early."
-        echo "Last MAVROS log lines:"
-        tail -n 40 "${LOG_DIR}/mavros.log" || true
-        exit 1
-    fi
-
-    echo "  waiting... ${i}/60"
-    sleep 0.5
+    echo "  waiting... ${i}/90"
+    sleep 1
 done
 
 if [[ "${MAVROS_CONNECTED}" != "1" ]]; then
     echo "ERROR: Timed out waiting for MAVROS connected."
     echo "Current /mavros/state:"
-    timeout 2s ros2 topic echo /mavros/state --once || true
+    timeout 5s ros2 topic echo /mavros/state --once || true
     echo "Last MAVROS log lines:"
-    tail -n 40 "${LOG_DIR}/mavros.log" || true
+    tail -n 80 "${LOG_DIR}/mavros.log" || true
     exit 1
 fi
 
