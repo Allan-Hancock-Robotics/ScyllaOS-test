@@ -130,6 +130,10 @@ if [[ "${MAVROS_CONNECTED}" != "1" ]]; then
     exit 1
 fi
 
+echo "starting start_qgc_camera.sh"
+chmod +x root/persistent_ws/ScyllaOS-test/pi_ws/start_qgc_camera.sh
+root/persistent_ws/ScyllaOS-test/pi_ws/start_qgc_camera.sh
+
 echo "Starting joy_to_manual_control..."
 ros2 run controls joy_to_manual_control --ros-args \
     --params-file "${JOY_PARAMS}" \
