@@ -7,42 +7,49 @@ MAVROS_PARAMS="${PI_WS}/mavros_ardusub.yaml"
 JOY_PARAMS="${PI_WS}/src/controls/config/joy_to_manual_control.yaml"
 LOG_DIR="${PI_WS}/logs"
 
-VIDEO_DEVICE="${VIDEO_DEVICE:-/dev/video0}"
-CAMERA_WIDTH="${CAMERA_WIDTH:-1920}"
-CAMERA_HEIGHT="${CAMERA_HEIGHT:-1080}"
-CAMERA_FRAME_ID="${CAMERA_FRAME_ID:-camera_link}"
+QGC_CAMERA_SCRIPT="${QGC_CAMERA_SCRIPT:-${PI_WS}/start_qgc_camera.sh}"
 
 mkdir -p "${LOG_DIR}"
 
-export FASTDDS_BUILTIN_TRANSPORTS=UDPv4
+export FASTDDS_BUILTIN_TRANSPORTS="${FASTDDS_BUILTIN_TRANSPORTS:-UDPv4}"
 
-set +u
 source "${PI_WS}/install/setup.bash"
-set -u
 
 MAVROS_PID=""
 JOY_PID=""
-CAMERA_PID=""
+QGC_CAMERA_PID=""
+MAVROS_READY=0
 
 cleanup() {
     trap - INT TERM EXIT
 
     echo ""
-    echo "Stopping ROV runtime..."
+    echo "Stopping control stack..."
 
-    if [[ -n "${CAMERA_PID}" ]]; then
-        kill "${CAMERA_PID}" >/dev/null 2>&1 || true
+    if [[ "${MAVROS_READY}" == "1" ]]; then
+        echo "Disarming vehicle..."
+        timeout 5s ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: false}" >/dev/null 2>&1 || true
+    else
+        echo "MAVROS was not ready; skipping disarm."
+    fi
+
+    if [[ -n "${QGC_CAMERA_PID}" ]]; then
+        echo "Stopping QGC camera stream..."
+        kill "${QGC_CAMERA_PID}" >/dev/null 2>&1 || true
     fi
 
     if [[ -n "${JOY_PID}" ]]; then
+        echo "Stopping joy_to_manual_control..."
         kill "${JOY_PID}" >/dev/null 2>&1 || true
     fi
 
     if [[ -n "${MAVROS_PID}" ]]; then
+        echo "Stopping MAVROS..."
         kill "${MAVROS_PID}" >/dev/null 2>&1 || true
     fi
 
     wait >/dev/null 2>&1 || true
+
     echo "Stopped."
 }
 
@@ -60,41 +67,6 @@ if [[ ! -f "${JOY_PARAMS}" ]]; then
     exit 1
 fi
 
-run_camera_tools_installer() {
-    echo "Running offline camera tools installer..."
-
-    if [[ -n "${CAMERA_INSTALLER_CMD:-}" ]]; then
-        echo "Using CAMERA_INSTALLER_CMD:"
-        echo "  ${CAMERA_INSTALLER_CMD}"
-        bash -lc "${CAMERA_INSTALLER_CMD}"
-        return
-    fi
-
-    if [[ -x "${PI_WS}/install_offline_camera_tools.sh" ]]; then
-        "${PI_WS}/install_offline_camera_tools.sh"
-        return
-    fi
-
-    if [[ -x "${PI_WS}/scripts/install_offline_camera_tools.sh" ]]; then
-        "${PI_WS}/scripts/install_offline_camera_tools.sh"
-        return
-    fi
-
-    if command -v install_offline_camera_tools >/dev/null 2>&1; then
-        install_offline_camera_tools
-        return
-    fi
-
-    if command -v offline_camera_tools_installer >/dev/null 2>&1; then
-        offline_camera_tools_installer
-        return
-    fi
-
-    echo "WARNING: Could not find an offline camera tools installer."
-    echo "Set CAMERA_INSTALLER_CMD to the exact installer command if needed."
-}
-
-#mavros
 echo "Starting MAVROS..."
 ros2 run mavros mavros_node --ros-args \
     --params-file "${MAVROS_PARAMS}" \
@@ -103,6 +75,7 @@ MAVROS_PID=$!
 
 echo "MAVROS PID: ${MAVROS_PID}"
 echo "MAVROS log: ${LOG_DIR}/mavros.log"
+
 echo "Waiting for MAVROS connection..."
 MAVROS_CONNECTED=0
 
@@ -118,7 +91,7 @@ for i in $(seq 1 60); do
     if ! kill -0 "${MAVROS_PID}" >/dev/null 2>&1; then
         echo "ERROR: MAVROS exited early."
         echo "Last MAVROS log lines:"
-        tail -n 40 "${LOG_DIR}/mavros.log"
+        tail -n 40 "${LOG_DIR}/mavros.log" || true
         exit 1
     fi
 
@@ -131,11 +104,10 @@ if [[ "${MAVROS_CONNECTED}" != "1" ]]; then
     echo "Current /mavros/state:"
     timeout 2s ros2 topic echo /mavros/state --once || true
     echo "Last MAVROS log lines:"
-    tail -n 40 "${LOG_DIR}/mavros.log"
+    tail -n 40 "${LOG_DIR}/mavros.log" || true
     exit 1
 fi
 
-#arming service
 echo "Waiting for arming service..."
 ARMING_SERVICE_READY=0
 
@@ -156,12 +128,24 @@ if [[ "${ARMING_SERVICE_READY}" != "1" ]]; then
     exit 1
 fi
 
-#camera service
-echo "starting start_qgc_camera.sh"
-chmod +x root/persistent_ws/ScyllaOS-test/pi_ws/start_qgc_camera.sh
-root/persistent_ws/ScyllaOS-test/pi_ws/start_qgc_camera.sh
+MAVROS_READY=1
 
-#manual control
+echo "Starting QGC camera stream..."
+
+if [[ -f "${QGC_CAMERA_SCRIPT}" ]]; then
+    chmod +x "${QGC_CAMERA_SCRIPT}"
+
+    "${QGC_CAMERA_SCRIPT}" > "${LOG_DIR}/qgc_camera.log" 2>&1 &
+    QGC_CAMERA_PID=$!
+
+    echo "QGC camera PID: ${QGC_CAMERA_PID}"
+    echo "QGC camera log: ${LOG_DIR}/qgc_camera.log"
+else
+    echo "WARNING: QGC camera script not found:"
+    echo "  ${QGC_CAMERA_SCRIPT}"
+    echo "Skipping QGC camera stream."
+fi
+
 echo "Starting joy_to_manual_control..."
 ros2 run controls joy_to_manual_control --ros-args \
     --params-file "${JOY_PARAMS}" \
@@ -171,35 +155,28 @@ JOY_PID=$!
 echo "joy_to_manual_control PID: ${JOY_PID}"
 echo "joy_to_manual_control log: ${LOG_DIR}/joy_to_manual_control.log"
 
-run_camera_tools_installer > "${LOG_DIR}/camera_tools_installer.log" 2>&1 || {
-    echo "ERROR: Camera tools installer failed."
-    tail -n 50 "${LOG_DIR}/camera_tools_installer.log" || true
-    exit 1
-}
+echo "Arming vehicle..."
+ARM_RESPONSE="$(timeout 10s ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}" 2>&1 || true)"
+echo "${ARM_RESPONSE}"
 
-echo "Starting v4l2_camera at ${CAMERA_WIDTH}x${CAMERA_HEIGHT} on ${VIDEO_DEVICE}..."
-ros2 run v4l2_camera v4l2_camera_node --ros-args \
-    -p "video_device:=${VIDEO_DEVICE}" \
-    -p "image_size:=[${CAMERA_WIDTH},${CAMERA_HEIGHT}]" \
-    -p "camera_frame_id:=${CAMERA_FRAME_ID}" \
-    > "${LOG_DIR}/v4l2_camera.log" 2>&1 &
-CAMERA_PID=$!
-
-echo "v4l2_camera PID: ${CAMERA_PID}"
-echo "v4l2_camera log: ${LOG_DIR}/v4l2_camera.log"
+echo "State after arming attempt:"
+timeout 3s ros2 topic echo /mavros/state --once || true
 
 echo ""
-echo "ROV runtime is running:"
-echo "  MAVROS PID:                ${MAVROS_PID}"
-echo "  joy_to_manual_control PID: ${JOY_PID}"
-echo "  v4l2_camera PID:           ${CAMERA_PID}"
+echo "Control stack running."
+echo "MAVROS PID:                ${MAVROS_PID}"
+echo "joy_to_manual_control PID: ${JOY_PID}"
+
+if [[ -n "${QGC_CAMERA_PID}" ]]; then
+    echo "QGC camera PID:            ${QGC_CAMERA_PID}"
+fi
+
 echo ""
 echo "Logs:"
 echo "  tail -f ${LOG_DIR}/mavros.log"
 echo "  tail -f ${LOG_DIR}/joy_to_manual_control.log"
-echo "  tail -f ${LOG_DIR}/camera_tools_installer.log"
-echo "  tail -f ${LOG_DIR}/v4l2_camera.log"
+echo "  tail -f ${LOG_DIR}/qgc_camera.log"
 echo ""
-echo "Press Ctrl+C to stop all processes."
+echo "Press Ctrl+C to disarm and stop."
 
 wait
