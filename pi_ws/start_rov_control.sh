@@ -108,26 +108,6 @@ if [[ "${MAVROS_CONNECTED}" != "1" ]]; then
     exit 1
 fi
 
-echo "Waiting for arming service..."
-ARMING_SERVICE_READY=0
-
-for i in $(seq 1 30); do
-    if ros2 service list 2>/dev/null | grep -q "^/mavros/cmd/arming$"; then
-        echo "Arming service available."
-        ARMING_SERVICE_READY=1
-        break
-    fi
-
-    echo "  waiting for arming service... ${i}/30"
-    sleep 0.5
-done
-
-if [[ "${ARMING_SERVICE_READY}" != "1" ]]; then
-    echo "ERROR: Timed out waiting for /mavros/cmd/arming."
-    ros2 service list | grep mavros || true
-    exit 1
-fi
-
 MAVROS_READY=1
 
 echo "Starting QGC camera stream..."
@@ -156,11 +136,11 @@ echo "joy_to_manual_control PID: ${JOY_PID}"
 echo "joy_to_manual_control log: ${LOG_DIR}/joy_to_manual_control.log"
 
 echo "Arming vehicle..."
-ARM_RESPONSE="$(timeout 10s ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}" 2>&1 || true)"
+ARM_RESPONSE="$(timeout 10s ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}" || true)"
 echo "${ARM_RESPONSE}"
 
 echo "State after arming attempt:"
-timeout 3s ros2 topic echo /mavros/state --once || true
+ros2 topic echo /mavros/state --once || true
 
 echo ""
 echo "Control stack running."

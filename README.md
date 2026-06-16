@@ -101,15 +101,38 @@ On pi side (and also on linux pc):
 **check middleware implementation:** ```echo $RMW_IMPLEMENTATION```
 
 ### other helpful commands:
-**open ROS monitoring window (pc side)** ```rqt```
+**open ROS monitoring window (pc side)** 
+```
+rqt
+```
 
-**command to run mavros with mavlink endpoint** ```ros2 run mavros mavros_node --ros-args -p fcu_url:=udp://:14000@127.0.0.1:14660/?ids=255,190```
-**run mavros with yaml file params**```ros2 run mavros mavros_node --ros-args --params-file mavros_ardusub.yaml```
+**run ros2 container on Fedora**
+```
+podman run --rm -it --network=host --ipc=host \
+  -e ROS_DOMAIN_ID=0 \
+  -v ~/ros2_ws:/root/rov_ws:Z \
+  docker.io/osrf/ros:jazzy-desktop bash
+```
+
+**command to run mavros with mavlink endpoint** 
+```
+ros2 run mavros mavros_node --ros-args -p fcu_url:=udp://:14000@127.0.0.1:14660/?ids=255,190
+```
+
+**run mavros with yaml file params**
+```
+ros2 run mavros mavros_node --ros-args --params-file mavros_ardusub.yaml
+```
 
 **run joy_to_manual with yaml file params***
-``` ros2 run controls joy_to_manual_control --ros-args   --params-file src/controls/config/joy_to_manual_control.yaml```
+``` 
+ros2 run controls joy_to_manual_control --ros-args   --params-file src/controls/config/joy_to_manual_control.yaml
+```
 
-**set mavros to armed*** ```ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}"```
+**set mavros to armed*** 
+```
+ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}"
+```
 
 **sanity check commands to verify telemetry streaming**
 - ```ros2 topic hz /mavros/imu/data```
@@ -117,9 +140,13 @@ On pi side (and also on linux pc):
 - ```ros2 topic echo /mavros/statustext/recv```
 
 **send simple movement command**
-``` ros2 topic pub -r 10 /mavros/manual_control/send mavros_msgs/msg/ManualControl \ "{x: 200, y: 0, z: 500, r: 0, buttons: 0}" ```
+``` ros2 topic pub -r 10 /mavros/manual_control/send mavros_msgs/msg/ManualControl \ "{x: 200, y: 0, z: 500, r: 0, buttons: 0}" 
+```
 
-**send simple movement with RC overide*** ```ros2 topic pub -r 10 /mavros/rc/override mavros_msgs/msg/OverrideRCIn \ "{channels: [1500, 1500, 1700, 1500, 1500, 1500, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535]}"```
+**send simple movement with RC overide*** 
+```
+ros2 topic pub -r 10 /mavros/rc/override mavros_msgs/msg/OverrideRCIn \ "{channels: [1500, 1500, 1700, 1500, 1500, 1500,65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535]}"
+```
 
 **test mavros can send MAVLink requests and get response**
  ```ros2 service call /mavros/param/pull mavros_msgs/srv/ParamPull "{}"```
