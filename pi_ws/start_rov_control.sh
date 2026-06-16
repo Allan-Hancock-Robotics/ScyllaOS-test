@@ -88,7 +88,7 @@ for i in $(seq 1 90); do
     fi
 
     CONNECTED_FIELD="$(timeout 5s ros2 topic echo /mavros/state --once --field connected 2>/dev/null || true)"
-    
+    echo "status: ${CONNECTED_FIELD}"
     if echo "${CONNECTED_FIELD}" | grep -qi "true"; then
         echo "MAVROS connected."
         MAVROS_CONNECTED=1
