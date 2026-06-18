@@ -11,10 +11,8 @@ from sensor_msgs.msg import Joy
 from mavros_msgs.msg import ManualControl
 from mavros_msgs.srv import CommandLong
 
-
 def clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
-
 
 class JoyToManualControl(Node):
     def __init__(self) -> None:
@@ -62,8 +60,8 @@ class JoyToManualControl(Node):
         self.declare_parameter("gripper_use_direct_servo", True)
         self.declare_parameter("gripper_servo_number", 9)
 
-        self.declare_parameter("gripper_open_pwm", 1300.0)
-        self.declare_parameter("gripper_close_pwm", 1700.0)
+        self.declare_parameter("gripper_open_pwm", 1100.0)
+        self.declare_parameter("gripper_close_pwm", 1900.0)
         self.declare_parameter("gripper_neutral_pwm", 1500.0)
         self.declare_parameter("gripper_pulse_sec", 0.5)
 
@@ -420,7 +418,6 @@ class JoyToManualControl(Node):
             self._gripper_neutral_timer.cancel()
             self.destroy_timer(self._gripper_neutral_timer)
             self._gripper_neutral_timer = None
-
 
 def main(args=None) -> None:
     rclpy.init(args=args)

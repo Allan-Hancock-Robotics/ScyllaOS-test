@@ -1,0 +1,12 @@
+[INFO] [1781825129.137010506] [mavros_node]: Starting mavros_node container
+[INFO] [1781825129.137179306] [mavros_node]: FCU URL: udp://:14000@127.0.0.1:14660
+[INFO] [1781825129.137195740] [mavros_node]: GCS URL: 
+[INFO] [1781825129.137205796] [mavros_node]: UAS Prefix: /uas1
+[INFO] [1781825129.137215098] [mavros_node]: Starting mavros router node
+[INFO] [1781825129.151311580] [mavros_router]: Built-in SIMD instructions: SSE, SSE2
+[INFO] [1781825129.151790433] [mavros_router]: Built-in MAVLink package version: 2025.12.12
+[INFO] [1781825129.151890743] [mavros_router]: Known MAVLink dialects: common ardupilotmega ASLUAV AVSSUAS all csAirLink cubepilot development icarous loweheiser marsh matrixpilot paparazzi standard stemstudios storm32 uAvionix ualberta
+[INFO] [1781825129.151996672] [mavros_router]: MAVROS Router started
+[INFO] [1781825129.152200634] [mavros_node]: Starting mavros uas node
+terminate called after throwing an instance of 'std::invalid_argument'
+  what():  UAS: GeographicLib exception: File not readable /usr/share/GeographicLib/geoids/egm96-5.pgm | Run install_geographiclib_dataset.sh script in order to install Geoid Model dataset!

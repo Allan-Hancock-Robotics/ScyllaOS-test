@@ -1,3 +1,15 @@
+### current bugs
+- start_rov_control fails on first run after boot, works on second
+
+- start_rov_control tries to arm but fails (remove this part and only arm on QGroundControl or fix it)
+
+### inconveniences
+- thruser pwms limited to min 1300, max 1500
+
+- claw control neeeds to spam button to open/close
+
+- start_rov_control takes a while to arm
+
 # ScyllaOS
 pc_ws - pc workspace (Ground control pc)
 

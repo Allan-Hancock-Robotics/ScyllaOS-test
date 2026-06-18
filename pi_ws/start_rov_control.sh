@@ -136,11 +136,8 @@ echo "joy_to_manual_control PID: ${JOY_PID}"
 echo "joy_to_manual_control log: ${LOG_DIR}/joy_to_manual_control.log"
 
 echo "Arming vehicle..."
-ARM_RESPONSE="$(timeout 10s ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}" || true)"
+ARM_RESPONSE="$(timeout 10s ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}")"
 echo "${ARM_RESPONSE}"
-
-echo "State after arming attempt:"
-ros2 topic echo /mavros/state --once || true
 
 echo ""
 echo "Control stack running."
