@@ -86,8 +86,8 @@ for i in $(seq 1 90); do
         tail -n 80 "${LOG_DIR}/mavros.log" || true
         exit 1
     fi
-
-    CONNECTED_FIELD="$(ros2 topic echo /mavros/state --once --field connected)"
+    echo "attempting connection..."
+    CONNECTED_FIELD="$(timeout 5s ros2 topic echo /mavros/state --once --field connected)"
     echo "status: ${CONNECTED_FIELD}"
     if echo "${CONNECTED_FIELD}" | grep -qi "true"; then
         echo "MAVROS connected."
@@ -134,10 +134,6 @@ JOY_PID=$!
 
 echo "joy_to_manual_control PID: ${JOY_PID}"
 echo "joy_to_manual_control log: ${LOG_DIR}/joy_to_manual_control.log"
-
-echo "Arming vehicle..."
-ARM_RESPONSE="$(timeout 10s ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool "{value: true}")"
-echo "${ARM_RESPONSE}"
 
 echo ""
 echo "Control stack running."
