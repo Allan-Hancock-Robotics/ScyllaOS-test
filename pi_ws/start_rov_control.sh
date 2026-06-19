@@ -85,9 +85,10 @@ for i in $(seq 1 90); do
         echo "Last MAVROS log lines:"
         tail -n 80 "${LOG_DIR}/mavros.log" || true
         exit 1
-    fi
+    fi 
+
     echo "attempting connection..."
-    CONNECTED_FIELD="$(timeout 5s ros2 topic echo /mavros/state --once --field connected)"
+    CONNECTED_FIELD="$(ros2 topic echo /mavros/state --once --field connected)"
     echo "status: ${CONNECTED_FIELD}"
     if echo "${CONNECTED_FIELD}" | grep -qi "true"; then
         echo "MAVROS connected."
